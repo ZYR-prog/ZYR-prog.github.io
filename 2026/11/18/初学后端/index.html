@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>初学后端 | Hexo</title><noscript>Enable JavaScript to view this site</noscript><link rel="icon" href="/img/logo.png"><link rel="stylesheet" href="/css/index.css?v=4.0.0"><link rel="canonical" href="https://zyr.dpdns.org/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/index.html"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.0/css/all.min.css"><!-- Feature-specific CSS--><!-- aplayer--><!-- swiper--><!-- fancybox ui--><!-- katex--><!-- Open Graph--><meta name="description" content="学后端不是背组件，而是理解“什么问题该用哪个组件、它们怎么串起来”。 后端全景地图 层级 定位 代表技术 ① 业务与架构层 系统怎么设计和拆 分层架构 &amp;#x2F; 微服务 &amp;#x2F; DDD &amp;#x2F; 单体 vs 分布式 ② 框架与编程层 代码怎么写 Java &amp;#x2F;"><!-- pwa--><meta name="apple-mobile-web-app-capable" content="Hexo"><meta name="theme-color" content="var(--efu-main)"><meta name="apple-mobile-web-app-status-bar-style" content="var(--efu-main)"><link rel="bookmark" href="/img/logo.png"><link rel="apple-touch-icon" href="/img/logo.png" sizes="180x180"><script>console.log(' %c Solitude %c ' + '4.0.0' + ' %c https://github.com/everfu/hexo-theme-solitude',
+    'background:#35495e ; padding: 1px; border-radius: 3px 0 0 3px;  color: #fff',
+    'background:#ff9a9a ; padding: 1px; border-radius: 0 3px 3px 0;  color: #fff',
+    'background:unset ; padding: 1px; border-radius: 0 3px 3px 0;  color: #fff')
+</script><script>(()=>{
+        const parseConfig = (id) => {
+            const element = document.getElementById(id)
+            if (!element) return {}
+            try {
+                return JSON.parse(element.content?.textContent || element.textContent || '{}')
+            } catch (error) {
+                console.error('Invalid Solitude config:', error)
+                return {}
+            }
+        }
+        const saveToLocal = {
+            set: function setWithExpiry(key, value, ttl) {
+                if (ttl === 0)
+                    return
+                const now = new Date()
+                const expiryDay = ttl * 86400000
+                const item = {
+                    value: value,
+                    expiry: now.getTime() + expiryDay
+                }
+                localStorage.setItem(key, JSON.stringify(item))
+            },
+            get: function getWithExpiry(key) {
+                const itemStr = localStorage.getItem(key)
+
+                if (!itemStr) {
+                    return undefined
+                }
+                let item
+                try {
+                    item = JSON.parse(itemStr)
+                } catch (error) {
+                    localStorage.removeItem(key)
+                    return undefined
+                }
+                const now = new Date()
+
+                if (now.getTime() > item.expiry) {
+                    localStorage.removeItem(key)
+                    return undefined
+                }
+                return item.value
+            }
+        };
+        const resourceRequests = new Map()
+        const loadResource = (url, create) => {
+            const absoluteUrl = new URL(url, document.baseURI).href
+            if (resourceRequests.has(absoluteUrl)) return resourceRequests.get(absoluteUrl)
+            const request = new Promise((resolve, reject) => {
+                const element = create(absoluteUrl)
+                element.addEventListener('load', () => resolve(element), {once: true})
+                element.addEventListener('error', () => {
+                    resourceRequests.delete(absoluteUrl)
+                    reject(new Error('Unable to load ' + absoluteUrl))
+                }, {once: true})
+                document.head.appendChild(element)
+            })
+            resourceRequests.set(absoluteUrl, request)
+            return request
+        }
+        const api = window.Solitude || {}
+        window.Solitude = api
+        api.installLegacyAdapter = () => {
+            const aliases = {
+                utils: api,
+                sco: api,
+                GLOBAL_CONFIG: api.config
+            }
+            Object.entries(aliases).forEach(([name, value]) => {
+                if (name in window) return
+                Object.defineProperty(window, name, {
+                    configurable: true,
+                    enumerable: false,
+                    value
+                })
+            })
+        }
+        Object.defineProperties(api, {
+            config: {configurable: true, get: () => parseConfig('site-config')},
+            page: {configurable: true, get: () => parseConfig('config-diff')}
+        })
+        Object.assign(api, {
+            saveToLocal: saveToLocal,
+            loadStyle: (url, options = {}) => loadResource(url, href => {
+                const link = document.createElement('link')
+                link.rel = 'stylesheet'
+                link.href = href
+                if (options.id) link.id = options.id
+                return link
+            }),
+            loadScript: (url, options = {}) => {
+              if (url.includes('barrage')) api.installLegacyAdapter()
+              return loadResource(url, src => {
+                const script = document.createElement('script')
+                script.src = src
+                script.async = options.async !== false
+                Object.entries(options.attributes || {}).forEach(([key, value]) => script.setAttribute(key, value))
+                return script
+              })
+            },
+            addGlobalFn: (key, fn, name = false, parent = window) => {
+                const globalFn = parent.globalFn || {}
+                const keyObj = globalFn[key] || {}
+
+                if (name && keyObj[name]) return
+
+                name = name || Object.keys(keyObj).length
+                keyObj[name] = fn
+                globalFn[key] = keyObj
+                parent.globalFn = globalFn
+            },
+            addEventListenerPjax: (ele, event, fn, option = false) => {
+              ele.addEventListener(event, fn, option)
+              api.addGlobalFn('pjax', () => {
+                  ele.removeEventListener(event, fn, option)
+              })
+            },
+            diffDateFormat: (selector) => {
+                selector.forEach(item => {
+                    const date = new Date(item.getAttribute('datetime') || item.textContent);
+                    item.textContent = (date.getMonth() + 1).toString()+'/'+date.getDate().toString();
+                });
+            },
+        })
+        api.getCSS = (url, id = false) => api.loadStyle(url, {id})
+        api.getScript = (url, attr = {}) => api.loadScript(url, {attributes: attr})
+        api.on = (name, handler) => {
+            const eventName = 'solitude:' + name
+            document.addEventListener(eventName, handler)
+            return () => document.removeEventListener(eventName, handler)
+        }
+        api.navigate = url => api.pjax?.loadUrl ? api.pjax.loadUrl(url) : window.location.assign(url)
+    })()</script><!-- theme--><script>initTheme = () => {
+    let isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const cachedMode = Solitude.saveToLocal.get('theme');
+    if (cachedMode === undefined) {
+        const nowMode =
+            isDarkMode ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', nowMode);
+    } else {
+        document.documentElement.setAttribute('data-theme', cachedMode);
+    }
+    Solitude.rightMenu?.mode(cachedMode === 'dark' && isDarkMode)
+}
+initTheme()</script><template id="site-config">{"root":"/","runtime":"2023-04-20 00:00:00","lazyload":{"enable":false,"error":"/img/error_load.avif"},"copyright":false,"highlight":{"limit":200,"expand":true,"copy":true,"syntax":"highlight.js"},"friend_links":{"async":false,"path":"/links.json","total":0,"placeholder":"","default_avatar":"/img/default_avatar.avif","more_url":"/links/","loading":"Loading friend links...","error":"Unable to load friend links. Please try again.","retry":"Retry","random":"Visit a random friend link. Its safety and availability are not guaranteed. Selected: ⌈ ${name} ⌋","to":"Visit","more":"More","default_sort":"Default order","random_sort":"Random order","sort_label":"Change sort order","scroll_left":"Scroll left","scroll_right":"Scroll right"},"random_posts":["2026/11/16/Tierd/","2026/11/15/hello-world/","2026/11/18/初学后端/"],"randomlink":false,"feature_modules":{"search":false,"post_ai":false,"friend_links":false,"music":false,"right_menu":false,"translate":true,"covercolor":false},"lang":{"theme":{"dark":"Dark mode enabled","light":"Light mode enabled"},"copy":{"success":"Copied","error":"Copy failed"},"backtop":"Back to top","time":{"day":" days ago","hour":" hours ago","just":"now","min":" minutes ago","month":" months ago"},"day":" days","f12":"Developer mode is enabled. Please follow the GPL.","totalk":"Type your comment directly; blank lines are fine."},"aside":{"state":{"morning":"✨ 早上好，新的一天开始了","noon":"🍲 午餐时间","afternoon":"🌞 下午好","night":"早点休息","goodnight":"晚安 😴"},"witty_words":[],"witty_comment":{"prefix":"Long time no see, ","back":"Welcome back, "}},"covercolor":{"enable":false,"mode":"local","api":"https://api.qjqq.cn/api/Imgcolor?img=","time":43200000},"comment":false,"lightbox":null,"right_menu":false,"translate":{"translateDelay":0,"defaultEncoding":2,"toSimplified":"Simplified","toTraditional":"Traditional","switchedToSimplified":"Switched to Simplified Chinese","switchedToTraditional":"Switched to Traditional Chinese"},"lure":false,"expire":false}</template><template id="config-diff">{"is_post":true,"is_page":false,"is_home":false,"page":"post","toc":true,"comment":false,"ai_text":false,"color":false}</template><meta name="generator" content="Hexo 8.1.2"></head><body id="body"><div id="console"><div class="console-content"><div class="console-card-group" data-solitude-action="onConsoleCardGroupClick" data-solitude-event="true"><div class="console-card-group-right"><div class="console-card tags" data-solitude-action="hideConsole"><div class="card-content"><div class="author-content-item-tips">Tags</div><div class="author-content-item-title">Explore topics</div></div><div class="card-tag-cloud"><a href="/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/">知识分享<sup>1</sup></a><a href="/tags/%E5%90%8E%E7%AB%AF/">后端<sup>1</sup></a></div></div><div class="console-card history" data-solitude-action="hideConsole"><ul class="card-archive-list"><li class="item"><a href="/archives/2026/11/"><span class="date">2026/11</span><div class="count-group"><span class="count">3</span><span class="unit">Posts</span></div></a></li><li class="item"><a href="/archives/"><span class="date">All posts</span><div class="count-group"><span class="count">3</span><span class="unit">Posts</span></div></a></li></ul></div></div></div><div class="button-group"><div class="console-btn-item"><span class="darkmode_switchbutton" data-solitude-action="toggleTheme" title="Theme" heotip="Theme"><i class="solitude fas fa-circle-half-stroke"></i></span></div><div class="console-btn-item" id="consoleHideAside"><span class="asideSwitch" data-solitude-action="switchHideAside" title="Sidebar" heotip="Sidebar"><i class="solitude fas fa-arrows-left-right-to-line"></i></span></div></div></div><div class="console-mask" data-solitude-action="hideConsole"></div></div><div id="sidebar" style="zoom: 1;"><div id="menu-mask" style="display: none;"></div><div id="sidebar-menus"><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Archives</div><div class="length-num">3</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">1</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">2</div></a></div></div></div><span class="sidebar-menu-item-title">Function</span><div class="sidebar-menu-item"><span class="darkmode_switchbutton menu-child" data-solitude-action="toggleTheme"><i class="solitude fas fa-circle-half-stroke"></i><span>Display mode</span></span></div><span class="sidebar-menu-item-title">Tags</span><div class="card-tags"><div class="card-tag-cloud"><a href="/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/">知识分享<sup>1</sup></a><a href="/tags/%E5%90%8E%E7%AB%AF/">后端<sup>1</sup></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav class="show" id="nav" data-solitude-action="onNavBlankClickCloseConsole" data-solitude-event="true"><div id="nav-group"><div id="blog_name"><a href="/" title="Back to home" id="site-name" heotip="Back to home"><span class="title">Solitude</span><i class="solitude fas fa-home"></i></a></div><div id="page-name-mask"><div id="page-name"><a id="page-name-text" data-solitude-action="toTop" title="Back to top" heotip="Back to top">初学后端</a></div></div><div id="menus"></div><div id="nav-left"></div><div id="nav-right"><div class="nav-button" id="nav-totop" data-solitude-action="toTop" title="Back to top" heotip="Back to top"><a class="totopbtn"><i class="solitude fas fa-arrow-up"></i><span id="percent">0</span></a></div><div id="toggle-menu"><a class="site-page"><i class="solitude fas fa-bars"></i></a></div></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original" title="Licensed under Original.">Original</a><span class="post-meta-categories"><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF%E5%AD%A6%E4%B9%A0/">后端学习</a></span><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/"><span class="tags-name tags-punctuation"><i class="solitude fas fa-hashtag"></i>知识分享</span></a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF/"><span class="tags-name tags-punctuation"><i class="solitude fas fa-hashtag"></i>后端</span></a></div></div></div></div><h1 class="post-title">初学后端</h1><div id="post-meta"><div class="meta-secondline"></div></div></div><div class="post-radius-bottom"></div><article class="post-content article-container"><p>学后端不是背组件，而是理解“什么问题该用哪个组件、它们怎么串起来”。 </p>
+<h2 id="后端全景地图"><a href="#后端全景地图" class="headerlink" title="后端全景地图"></a>后端全景地图</h2><table>
+<thead>
+<tr>
+<th>层级</th>
+<th>定位</th>
+<th>代表技术</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 业务与架构层</td>
+<td>系统怎么设计和拆</td>
+<td>分层架构 &#x2F; 微服务 &#x2F; DDD &#x2F; 单体 vs 分布式</td>
+</tr>
+<tr>
+<td>② 框架与编程层</td>
+<td>代码怎么写</td>
+<td>Java &#x2F; Spring Boot（Web 框架）&#x2F; MyBatis &#x2F; 分层</td>
+</tr>
+<tr>
+<td>③ 中间件层</td>
+<td>能力从哪来</td>
+<td>MySQL &#x2F; Redis &#x2F; MQ &#x2F; ES &#x2F; Nacos &#x2F; Gateway</td>
+</tr>
+<tr>
+<td>④ 基础设施层</td>
+<td>跑在哪、怎么运维</td>
+<td>Linux &#x2F; Docker &#x2F; K8s &#x2F; Nginx &#x2F; 监控 &#x2F; CI-CD</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>注意！分层架构不是全景图里的一个独立层，而是②框架层内部的一种代码组织方式。</p>
+</li>
+<li><p>Web 框架</p>
+</li>
+</ul>
+<p> → 属于「② 框架与编程层」 它是 写代码的工具 </p>
+<p> • 它解决的问题： 一个请求进来，怎么写接口处理它</p>
+<p> • 它是 具体技术 ，有明确的名字：Spring MVC、Spring Boot</p>
+<p> • 不管单体还是微服务，都要用 Web 框架</p>
+<ul>
+<li><p>微服务 </p>
+<p>→ 属于「① 业务与架构层」 </p>
+<p>它是 系统设计的思想 ，不是某个具体框架： </p>
+<p>• 核心思路：把一个大系统，按业务拆成一堆独立的小服务。</p>
+<p>• 它解决的问题： 一个系统要不要拆、怎么拆、拆完怎么协同 </p>
+<p>• 它是 架构选择 ，是“单体的另一个选项” </p>
+<p>• 落地时才需要一堆具体工具（Nacos、Gateway 等，那些在③中间件层）</p>
+</li>
+<li><p>举例<br>一个真实系统展开是这样：<br>微服务系统                 ← ① 架构层（拆成了3个服务）’<br><br>   用户服务<br>  Spring Boot Web 框架        ← ② 框架层（每个服务内部）<br><br>  分层：Controller&#x2F;Service&#x2F;DAO<br><br>  MySQL                        ← ③ 中间件层<br><br>  Docker 部署                  ← ④ 基础设施层<br><br>   订单服务（同样结构）<br><br>   支付服务（同样结构）<br><br> ↑ 服务之间靠 Nacos 发现、Gateway 统一入口 ← ③ 中间件层</p>
+</li>
+</ul>
+<h2 id="分层架构"><a href="#分层架构" class="headerlink" title="分层架构"></a>分层架构</h2><p>就是把一个软件系统按职责从上到下切成几层，每层只干自己那摊事，并且 只允许相邻层之间调用 。就像公司里基层员工不直接找老板签字一样。</p>
+<p>一句话记忆： 分层 &#x3D; 每层只做一件事，上下单向调用，靠接口解耦。</p>
+<ul>
+<li>最经典的：三层架构 后端开发里最常见的就是这套：</li>
+</ul>
+<p>│  表现层 &#x2F; Controller 层      │  ← 接收请求、返回响应</p>
+<p>│  业务层 &#x2F; Service 层         │  ← 核心业务逻辑</p>
+<p>│  数据访问层 &#x2F; DAO &#x2F; Mapper   │  ← 增删改查数据库</p>
+<p>│  数据库 &#x2F; 外部资源            │</p>
+<ul>
+<li>分层的核心铁律</li>
+</ul>
+<ol>
+<li>只能自上而下调用 ：Controller 可以调 Service，Service 可以调 DAO，但 DAO 不能反过来调 Service ，Controller 也不能跨过 Service 直接调 DAO。</li>
+<li>每层只管自己 ：Controller 不写 SQL，DAO 不做业务判断，Service 不碰 HttpServletRequest。 </li>
+<li>层与层之间靠接口通信 ：上层只依赖下层的接口，不关心实现。这样以后换数据库只动 DAO 层。</li>
+</ol>
+<ul>
+<li><p>分层的代价</p>
+</li>
+<li><p> 分层不是免费午餐： </p>
+<p> • 代码变多 ：一个简单的”增删改查”要写 3~4 个类； </p>
+<p> • 数据要层层传递 ：Controller 收到的参数要转成 DTO 传给 Service； </p>
+<p> • 过度设计风险 ：业务很简单还硬拆四层，纯属自找麻烦； </p>
+<p> • 性能开销 ：多一次调用就多一层栈，不过通常可忽略。</p>
+</li>
+<li><p>几个容易混的<br> • 分层架构 ≠ MVC ：MVC 是 UI 层的划分模式（模型&#x2F;视图&#x2F;控制器）；分层架构是整体的纵向切分。Web 项目里 MVC 通常只体现在表现层内部。 </p>
+<p> • 分层架构 ≠ 微服务 ：微服务是”按业务垂直拆分”（订单服务、用户服务），分层是”按职责水平拆分”。一个订单微服务内部，照样会分层。 </p>
+<p> • 四层、五层也常见 ：比如加上”领域层（Domain）”、独立的”基础设施层”，就是 DDD 的经典四层。</p>
+</li>
+</ul>
+<h2 id="生态"><a href="#生态" class="headerlink" title="生态"></a>生态</h2><p>“后端生态”说的不是某一个技术，而是 围绕后端开发的一整套技术、工具、框架、服务和社区的总和 。可以类比成“生态系统”这个词的比喻用法：土壤、植物、动物互相支持、彼此依赖。</p>
+<h3 id="后端生态包含什么"><a href="#后端生态包含什么" class="headerlink" title="后端生态包含什么"></a>后端生态包含什么</h3><p> 可以按从核心到外围分四圈来理解：</p>
+<ol>
+<li><p>第一圈：语言 + 框架（地基） </p>
+<p> • Java ：JDK 版本、Java 语言特性（Lambda、Stream、记录类）</p>
+<p> • 框架 ：Spring、Spring Boot、Spring MVC、MyBatis &#x2F; MyBatis-Plus </p>
+<p> 这一圈就是绝大多数人说的“后端技术栈”主体  第二圈：基础设施（必须碰的中间件） 表格</p>
+</li>
+<li><p>第二圈：基础设施（必须碰的中间件）</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>解决什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据库</td>
+<td>存业务数据</td>
+</tr>
+<tr>
+<td>缓存</td>
+<td>加速热点数据、分布式锁</td>
+</tr>
+<tr>
+<td>消息队列</td>
+<td>削峰、异步、解耦</td>
+</tr>
+<tr>
+<td>搜索引擎</td>
+<td>全文检索、日志分析</td>
+</tr>
+<tr>
+<td>注册中心&#x2F;配置中心</td>
+<td>服务发现、动态配置</td>
+</tr>
+<tr>
+<td>网关</td>
+<td>统一入口、限流、鉴权</td>
+</tr>
+</tbody></table>
+<ol start="3">
+<li><p>第三圈：工程化能力（决定你能不能干活） </p>
+<p> • 版本控制 ：Git（你刚在折腾的东西） </p>
+<p> • 构建工具 ：Maven、Gradle </p>
+<p> • 容器化与部署 ：Docker、K8s、Jenkins&#x2F;GitHub Actions </p>
+<p> • 测试 ：JUnit、Mockito、Postman &#x2F; Apifox 接口测试</p>
+<p> • 日志与监控 ：Logback、Prometheus + Grafana、SkyWalking（链路追踪） </p>
+<p> • Linux 命令 ：部署一定跑在 Linux 上，ps、grep、tail -f 这类绕不开</p>
+</li>
+<li><p>第四圈：工程规范与安全（进阶）</p>
+</li>
+</ol>
+<p>  • 接口设计规范（RESTful、统一返回体、错误码）</p>
+<pre><code>• 认证授权（JWT、OAuth2、Spring Security） 
+
+• 安全防护（防 SQL 注入、XSS、接口限流防刷、密码加密存储）
+
+• 性能优化（SQL 优化、索引、连接池、JVM 调优） 
+ 
+• 分布式问题（分布式事务、幂等、可靠性投递）
+</code></pre>
+<p>为什么叫“生态”而不是“技术列表” 因为这些东西 不是孤立的 ，它们互相咬合，组合起来才见功力。</p>
+<h2 id="学习顺序"><a href="#学习顺序" class="headerlink" title="学习顺序"></a>学习顺序</h2><ul>
+<li>学的顺序 ： </li>
+<li></li>
+</ul>
+<p>先学 ② 框架层  → 用 Spring Boot + MySQL 写出完整单体（阶段1）</p>
+<p>再补 ③ 中间件  → Redis &#x2F; MQ &#x2F; Linux 部署（阶段2-3）</p>
+<p>最后学 ① 架构层 → 微服务拆分（阶段4，且看需求）</p>
+<p>  ②③是能立刻变现的技能，①架构是锦上添花的选择。</p>
+<pre><code>## Node.js
+</code></pre>
+<h2 id="跨端-react-native"><a href="#跨端-react-native" class="headerlink" title="跨端  react native"></a>跨端  react native</h2><h2 id="Three-js3D"><a href="#Three-js3D" class="headerlink" title="Three.js3D"></a>Three.js3D</h2><h2 id="PRD"><a href="#PRD" class="headerlink" title="PRD"></a>PRD</h2><h2 id="网络通信五元组。"><a href="#网络通信五元组。" class="headerlink" title="网络通信五元组。"></a>网络通信五元组。</h2><h3 id="网络协议"><a href="#网络协议" class="headerlink" title="网络协议"></a>网络协议</h3><h2 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h2></article><div class="post-copyright"><div class="post-copyright__author_group"><div class="post-copyright__author_img"><img class="post-copyright__author_img_front" src="/img/logo.png"></div><div class="post-copyright__author_name">John Doe</div><div class="post-copyright__author_desc"></div></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div id="quit-box" data-solitude-action="hideReward"></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">This original article uses the<a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>license. Please credit<a href="/">Hexo</a></span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/"><span class="tags-punctuation"><i class="solitude fas fa-hashtag"></i>知识分享<span class="tagsPageCount">1</span></span></a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF/"><span class="tags-punctuation"><i class="solitude fas fa-hashtag"></i>后端<span class="tagsPageCount">1</span></span></a></div></div></div><nav class="needEndHide pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/11/16/Tierd/"><div class="pagination-info"><div class="label">Next</div><div class="next_info">Tierd</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><div class="top-group"><div class="sayhi" id="sayhi" data-solitude-action="changeWittyWord"></div></div></div><div class="avatar"><img alt="Avatar" src="/img/logo.png"></div><div class="description"></div><div class="bottom-group"><span class="left"><div class="name">John Doe</div><div class="desc">只有迎风，风筝才能飞得更高。</div></span><div class="social-icons is-center"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="solitude fas fa-bars"></i><span>Contents</span></div><div class="toc-content" id="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E7%AB%AF%E5%85%A8%E6%99%AF%E5%9C%B0%E5%9B%BE"><span class="toc-text">后端全景地图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="toc-text">分层架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%80%81"><span class="toc-text">生态</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E7%AB%AF%E7%94%9F%E6%80%81%E5%8C%85%E5%90%AB%E4%BB%80%E4%B9%88"><span class="toc-text">后端生态包含什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E9%A1%BA%E5%BA%8F"><span class="toc-text">学习顺序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%A8%E7%AB%AF-react-native"><span class="toc-text">跨端  react native</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Three-js3D"><span class="toc-text">Three.js3D</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PRD"><span class="toc-text">PRD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E4%BA%94%E5%85%83%E7%BB%84%E3%80%82"><span class="toc-text">网络通信五元组。</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE"><span class="toc-text">网络协议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON"><span class="toc-text">JSON</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="solitude fas fa-map"></i><span>Recent posts</span></div><div class="aside-list"><a class="aside-list-item" href="/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/" title="初学后端"><div class="content"><span class="title" href="/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/" title="初学后端">初学后端</span><span class="categories" href="/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/">后端学习</span></div></a><a class="aside-list-item" href="/2026/11/16/Tierd/" title="Tierd"><div class="content"><span class="title" href="/2026/11/16/Tierd/" title="Tierd">Tierd</span></div></a><a class="aside-list-item" href="/2026/11/15/hello-world/" title="Hello World"><div class="content"><span class="title" href="/2026/11/15/hello-world/" title="Hello World">Hello World</span></div></a></div></div></div></div></main><footer id="footer"><div id="st-footer"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div class="copyright">© 2023 - 2026 By<a class="footer-bar-link" href="/" title="John Doe">John Doe</a></div><div class="beian-group"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://hexo.io/" title="Framework: Hexo" heotip="Framework: Hexo">Framework: Hexo</a><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/everfu/hexo-theme-solitude" title="Theme: Solitude" heotip="Theme: Solitude">Theme: Solitude</a></div></div><div class="footer-bar-right"></div></div></div><div class="comment-barrage needEndHide"></div></footer></div><div><!-- Critical scripts loaded synchronously--><script src="/js/utils.js?v=4.0.0"></script><!-- Non-critical scripts loaded asynchronously--><script defer src="/js/third_party/waterfall.min.js?v=4.0.0"></script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script><!-- Feature-specific scripts loaded asynchronously--><!-- UI enhancement scripts--><script defer src="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script><!-- Music player scripts--><!-- Cover color processing scripts--><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+Solitude.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+</script><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- Search functionality--><!-- Main module dynamically imports enabled first-party features.--><script type="module" src="/js/main.js?v=4.0.0"></script><div class="js-pjax"></div></div><!-- pjax--><script>function initPjax() {
+    if (typeof Pjax === 'undefined') {
+        setTimeout(initPjax, 100);
+        return;
+    }
+
+    const instance = new Pjax({
+        elements: 'a:not([target="_blank"])',
+        selectors: ["title","#body-wrap","#site-config","meta[name=\"description\"]",".js-pjax","meta[property^=\"og:\"]","#config-diff",".rs_show",".rs_hide"],
+        cacheBust: false,
+        analytics: false,
+        scrollRestoration: false
+    })
+
+    // Pjax dispatches synthetic resize/scroll events on window after every selector switch.
+    // Use a Node target so injected listeners that call event.target.contains() remain compatible.
+    instance.onSwitch = function () {
+        this.state.numPendingSwitches--
+
+        if (this.state.numPendingSwitches === 0) {
+            document.dispatchEvent(new Event('resize', { bubbles: true }))
+            document.dispatchEvent(new Event('scroll', { bubbles: true }))
+            this.afterAllSwitches()
+        }
+    }
+
+    Solitude.pjax = instance;
+
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+        const newScript = document.createElement('script')
+        const content = item.text || item.textContent || item.innerHTML || ""
+        Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+        newScript.appendChild(document.createTextNode(content))
+        item.parentNode.replaceChild(newScript, item)
+    })
+
+    document.addEventListener('pjax:send', () => {
+        document.dispatchEvent(new CustomEvent('solitude:beforeNavigate'))
+        Solitude.disposePage?.()
+        Object.values(window.globalFn?.pjax || {}).forEach(dispose => dispose())
+        if (window.globalFn) window.globalFn.pjax = {}
+    })
+
+    document.addEventListener('pjax:complete', async () => {
+        await Solitude.refresh()
+
+        document.querySelectorAll('script[data-pjax]').forEach(item => {
+            const newScript = document.createElement('script')
+            const content = item.text || item.textContent || item.innerHTML || ""
+            Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+            newScript.appendChild(document.createTextNode(content))
+            item.parentNode.replaceChild(newScript, item)
+        })
+
+        Solitude.config.lazyload.enable && window.lazyLoadInstance?.update()
+        document.dispatchEvent(new CustomEvent('solitude:afterNavigate', {
+            detail: {page: Solitude.page}
+        }))
+
+    })
+
+    document.addEventListener('pjax:error', (e) => {
+        if (e.request.status === 404) {
+            Solitude.navigate('/404.html')
+        }
+    })
+}
+
+// 初始化 Pjax
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPjax);
+} else {
+    initPjax();
+}</script><!-- google adsense--></body></html>
