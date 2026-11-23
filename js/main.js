@@ -151,11 +151,13 @@ const percent = () => {
     ? window.scrollY + docEl.clientHeight >= endTarget.offsetTop
     : false;
 
-  navToTop?.classList.toggle("long", isNearEnd || scrolledPercent > 90);
+  const progress = isNearEnd ? 100 : Math.min(scrolledPercent, 100);
+  const totopFill = document.querySelector("#nav-totop .totop-fill");
+  if (totopFill) totopFill.style.width = 31 + 53 * (progress / 100) + "px";
   if (percentDisplay) percentDisplay.textContent =
-    isNearEnd || scrolledPercent > 90
+    progress >= 100
       ? Solitude.config.lang.backtop
-      : scrolledPercent;
+      : String(Math.max(1, progress));
 
   document
     .querySelectorAll(".needEndHide")

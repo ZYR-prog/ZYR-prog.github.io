@@ -1,0 +1,95 @@
+/* ==========================================================
+   自定义样式
+   1. 手机端文章字号
+   2. 右上角阅读进度挂件（黄色从圆长成椭圆）
+   ========================================================== */
+
+/* ---------- 1. 手机端文章字号（仅 <=768px 生效，电脑端不变） ---------- */
+@media screen and (max-width: 768px) {
+  .post-content p {
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
+  .post-content h1 {
+    font-size: 24px;
+  }
+
+  .post-content h2 {
+    font-size: 22px;
+  }
+
+  .post-content h3,
+  .post-content h4 {
+    font-size: 20px;
+  }
+
+  .post-content blockquote p {
+    font-size: 15px;
+  }
+}
+
+/* ---------- 2. 右上角阅读进度挂件 ---------- */
+#nav-totop {
+  width: 88px !important;
+  height: 35px;
+  padding: 0;
+  background: var(--efu-card-bg);
+  border-radius: 40px;
+  overflow: hidden;
+}
+
+#nav-totop .totopbtn {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent !important;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#nav-totop .totopbtn > i {
+  display: none !important;
+}
+
+/* 黄色填充：从左侧圆点开始，随进度向右长成椭圆 */
+#nav-totop .totop-fill {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  height: 31px;
+  width: 31px;
+  border-radius: 40px;
+  background: var(--efu-theme);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: width 0.18s linear;
+}
+
+#nav-totop #percent {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--efu-card-bg);
+  white-space: nowrap;
+  opacity: 1;
+}
+
+/* 悬停时保持文字显示，取消原来的放大/变透明 */
+#nav-totop:hover .totopbtn {
+  background: transparent !important;
+}
+
+#nav-totop:hover #percent {
+  opacity: 1;
+}
+
+#nav-totop:not(.long):hover .totopbtn {
+  transform: none;
+}
