@@ -152,7 +152,7 @@ initTheme()</script><template id="site-config">{"root":"/","runtime":"2023-04-20
 Solitude.addGlobalFn('pjaxSend', () => {
   Pace.restart()
 }, 'pace_restart')
-</script><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- Search functionality--><!-- Main module dynamically imports enabled first-party features.--><script type="module" src="/js/main.js?v=4.0.0"></script><script src="/js/click-effect.js"></script><div class="js-pjax"></div></div><!-- pjax--><script>function initPjax() {
+</script><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- Search functionality--><!-- Main module dynamically imports enabled first-party features.--><script type="module" src="/js/main.js?v=4.0.0"></script><script src="/js/click-effect.js"></script><script src="/js/touch-effect.js"></script><div class="js-pjax"></div></div><!-- pjax--><script>function initPjax() {
     if (typeof Pjax === 'undefined') {
         setTimeout(initPjax, 100);
         return;

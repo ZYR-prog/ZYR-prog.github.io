@@ -1,5 +1,10 @@
 /* 点击彩色粒子爆炸特效 */
 (function () {
+  // 只在非触屏设备（电脑）上启用，手机端使用滑动特效
+  var isTouchDevice =
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (isTouchDevice) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var canvas = document.createElement('canvas');
@@ -26,17 +31,20 @@
     var count = 18 + Math.floor(Math.random() * 8);
     for (var i = 0; i < count; i++) {
       var angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-      var speed = 2 + Math.random() * 5;
+      // 爆炸扩散速度（放慢）
+      var speed = 1.2 + Math.random() * 2.8;
       particles.push({
         x: x,
         y: y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1,
-        size: 1.5 + Math.random() * 2.5,
+        vy: Math.sin(angle) * speed - 0.6,
+        // 粒子半径（缩小为原来的一半）
+        size: 0.75 + Math.random() * 1.25,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         life: 1,
-        decay: 0.012 + Math.random() * 0.015,
-        gravity: 0.12
+        // 约 2 秒完全消失
+        decay: 0.0075 + Math.random() * 0.002,
+        gravity: 0.05
       });
     }
     if (!rafId) rafId = requestAnimationFrame(tick);
@@ -49,7 +57,7 @@
       p.x += p.vx;
       p.y += p.vy;
       p.vy += p.gravity;
-      p.vx *= 0.98;
+      p.vx *= 0.99;
       p.life -= p.decay;
       if (p.life <= 0) {
         particles.splice(i, 1);
