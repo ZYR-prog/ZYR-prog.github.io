@@ -16,6 +16,7 @@
   var particles = [];
   var rafId = null;
   var dpr = window.devicePixelRatio || 1;
+  var MAX_PARTICLES = 420;
 
   function resize() {
     canvas.width = window.innerWidth * dpr;
@@ -28,23 +29,24 @@
   var COLORS = ['#ffc848', '#ff9f43', '#ff6b6b', '#4ecdc4', '#5b8def', '#c084fc', '#ffffff'];
 
   function spawn(x, y) {
-    var count = 18 + Math.floor(Math.random() * 8);
+    var count = 22 + Math.floor(Math.random() * 8);
     for (var i = 0; i < count; i++) {
+      if (particles.length >= MAX_PARTICLES) particles.shift();
       var angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-      // 爆炸扩散速度（放慢）
-      var speed = 1.2 + Math.random() * 2.8;
+      // 爆炸飞散速度（半径比之前缩小一半）
+      var speed = 0.6 + Math.random() * 1.4;
       particles.push({
         x: x,
         y: y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 0.6,
-        // 粒子半径（缩小为原来的一半）
-        size: 0.75 + Math.random() * 1.25,
+        vy: Math.sin(angle) * speed - 0.4,
+        // 圆润卡通粒子：半径 2.5~4.5px
+        size: 2.5 + Math.random() * 2,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         life: 1,
-        // 约 2 秒完全消失
-        decay: 0.0075 + Math.random() * 0.002,
-        gravity: 0.05
+        // 约 4.5 秒完全炸完
+        decay: 0.0035 + Math.random() * 0.0006,
+        gravity: 0.035
       });
     }
     if (!rafId) rafId = requestAnimationFrame(tick);
@@ -57,16 +59,17 @@
       p.x += p.vx;
       p.y += p.vy;
       p.vy += p.gravity;
-      p.vx *= 0.99;
+      p.vx *= 0.985;
       p.life -= p.decay;
       if (p.life <= 0) {
         particles.splice(i, 1);
         continue;
       }
-      ctx.globalAlpha = Math.max(p.life, 0);
+      ctx.globalAlpha = Math.min(1, Math.max(p.life, 0) * 1.6);
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      // 前 70% 的时间保持饱满圆润，最后阶段才缩小消失
+      ctx.arc(p.x, p.y, p.size * (0.35 + 0.65 * p.life), 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
