@@ -93,3 +93,9 @@
 #nav-totop:not(.long):hover .totopbtn {
   transform: none;
 }
+
+/* ---------- 3. 文章目录（右侧 TOC）始终清晰 ---------- */
+#card-toc .toc-content .toc-link:not(.active) span {
+  filter: none;
+  opacity: 1;
+}

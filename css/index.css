@@ -4148,7 +4148,6 @@ span.tags-punctuation i {
   margin-left: 2px;
 }
 #card-toc:hover .toc-content .toc-link:not(.active) span {
-  filter: blur(0);
   opacity: 1;
 }
 @media screen and (min-width: 901px) {
@@ -4264,7 +4263,6 @@ span.tags-punctuation i {
 #card-toc .toc-content .toc-link:not(.active) span {
   opacity: 0.6;
   cursor: pointer;
-  filter: blur(1px);
   -webkit-transition: 0.3s;
   -moz-transition: 0.3s;
   -o-transition: 0.3s;
