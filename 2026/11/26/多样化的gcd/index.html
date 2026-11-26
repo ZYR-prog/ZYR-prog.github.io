@@ -1,0 +1,356 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>gcd 出现的题型分类 | Hexo</title><noscript>Enable JavaScript to view this site</noscript><link rel="icon" href="/img/logo.png"><link rel="stylesheet" href="/css/index.css?v=4.0.0"><link rel="canonical" href="https://zyr.dpdns.org/2026/11/26/%E5%A4%9A%E6%A0%B7%E5%8C%96%E7%9A%84gcd/index.html"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.0/css/all.min.css"><!-- Feature-specific CSS--><!-- aplayer--><!-- swiper--><!-- fancybox ui--><!-- katex--><!-- Open Graph--><meta name="description" content="一、gcd 出现在哪里gcd 的本质是 “两个数的最大公共度量” 。所以题目里一旦有“两个量之间来回折腾”的痕迹，就要往这想。 二、常见题型分类知道我为什么写这个吗？你知道那种你自己明明复习了这个类型，结果写题压根没认出来他的无力感吗。 我知道写题要靠自己融会贯通，不能只是背题背模板。我先一步一步来"><!-- pwa--><meta name="apple-mobile-web-app-capable" content="Hexo"><meta name="theme-color" content="var(--efu-main)"><meta name="apple-mobile-web-app-status-bar-style" content="var(--efu-main)"><link rel="bookmark" href="/img/logo.png"><link rel="apple-touch-icon" href="/img/logo.png" sizes="180x180"><script>console.log(' %c Solitude %c ' + '4.0.0' + ' %c https://github.com/everfu/hexo-theme-solitude',
+    'background:#35495e ; padding: 1px; border-radius: 3px 0 0 3px;  color: #fff',
+    'background:#ff9a9a ; padding: 1px; border-radius: 0 3px 3px 0;  color: #fff',
+    'background:unset ; padding: 1px; border-radius: 0 3px 3px 0;  color: #fff')
+</script><link rel="stylesheet" href="/css/custom.css"><script>(()=>{
+        const parseConfig = (id) => {
+            const element = document.getElementById(id)
+            if (!element) return {}
+            try {
+                return JSON.parse(element.content?.textContent || element.textContent || '{}')
+            } catch (error) {
+                console.error('Invalid Solitude config:', error)
+                return {}
+            }
+        }
+        const saveToLocal = {
+            set: function setWithExpiry(key, value, ttl) {
+                if (ttl === 0)
+                    return
+                const now = new Date()
+                const expiryDay = ttl * 86400000
+                const item = {
+                    value: value,
+                    expiry: now.getTime() + expiryDay
+                }
+                localStorage.setItem(key, JSON.stringify(item))
+            },
+            get: function getWithExpiry(key) {
+                const itemStr = localStorage.getItem(key)
+
+                if (!itemStr) {
+                    return undefined
+                }
+                let item
+                try {
+                    item = JSON.parse(itemStr)
+                } catch (error) {
+                    localStorage.removeItem(key)
+                    return undefined
+                }
+                const now = new Date()
+
+                if (now.getTime() > item.expiry) {
+                    localStorage.removeItem(key)
+                    return undefined
+                }
+                return item.value
+            }
+        };
+        const resourceRequests = new Map()
+        const loadResource = (url, create) => {
+            const absoluteUrl = new URL(url, document.baseURI).href
+            if (resourceRequests.has(absoluteUrl)) return resourceRequests.get(absoluteUrl)
+            const request = new Promise((resolve, reject) => {
+                const element = create(absoluteUrl)
+                element.addEventListener('load', () => resolve(element), {once: true})
+                element.addEventListener('error', () => {
+                    resourceRequests.delete(absoluteUrl)
+                    reject(new Error('Unable to load ' + absoluteUrl))
+                }, {once: true})
+                document.head.appendChild(element)
+            })
+            resourceRequests.set(absoluteUrl, request)
+            return request
+        }
+        const api = window.Solitude || {}
+        window.Solitude = api
+        api.installLegacyAdapter = () => {
+            const aliases = {
+                utils: api,
+                sco: api,
+                GLOBAL_CONFIG: api.config
+            }
+            Object.entries(aliases).forEach(([name, value]) => {
+                if (name in window) return
+                Object.defineProperty(window, name, {
+                    configurable: true,
+                    enumerable: false,
+                    value
+                })
+            })
+        }
+        Object.defineProperties(api, {
+            config: {configurable: true, get: () => parseConfig('site-config')},
+            page: {configurable: true, get: () => parseConfig('config-diff')}
+        })
+        Object.assign(api, {
+            saveToLocal: saveToLocal,
+            loadStyle: (url, options = {}) => loadResource(url, href => {
+                const link = document.createElement('link')
+                link.rel = 'stylesheet'
+                link.href = href
+                if (options.id) link.id = options.id
+                return link
+            }),
+            loadScript: (url, options = {}) => {
+              if (url.includes('barrage')) api.installLegacyAdapter()
+              return loadResource(url, src => {
+                const script = document.createElement('script')
+                script.src = src
+                script.async = options.async !== false
+                Object.entries(options.attributes || {}).forEach(([key, value]) => script.setAttribute(key, value))
+                return script
+              })
+            },
+            addGlobalFn: (key, fn, name = false, parent = window) => {
+                const globalFn = parent.globalFn || {}
+                const keyObj = globalFn[key] || {}
+
+                if (name && keyObj[name]) return
+
+                name = name || Object.keys(keyObj).length
+                keyObj[name] = fn
+                globalFn[key] = keyObj
+                parent.globalFn = globalFn
+            },
+            addEventListenerPjax: (ele, event, fn, option = false) => {
+              ele.addEventListener(event, fn, option)
+              api.addGlobalFn('pjax', () => {
+                  ele.removeEventListener(event, fn, option)
+              })
+            },
+            diffDateFormat: (selector) => {
+                selector.forEach(item => {
+                    const date = new Date(item.getAttribute('datetime') || item.textContent);
+                    item.textContent = (date.getMonth() + 1).toString()+'/'+date.getDate().toString();
+                });
+            },
+        })
+        api.getCSS = (url, id = false) => api.loadStyle(url, {id})
+        api.getScript = (url, attr = {}) => api.loadScript(url, {attributes: attr})
+        api.on = (name, handler) => {
+            const eventName = 'solitude:' + name
+            document.addEventListener(eventName, handler)
+            return () => document.removeEventListener(eventName, handler)
+        }
+        api.navigate = url => api.pjax?.loadUrl ? api.pjax.loadUrl(url) : window.location.assign(url)
+    })()</script><!-- theme--><script>initTheme = () => {
+    const cachedMode = Solitude.saveToLocal.get('theme');
+    if (cachedMode === undefined)
+        document.documentElement.setAttribute('data-theme', 'dark');
+    else
+        document.documentElement.setAttribute('data-theme', cachedMode);
+    Solitude.rightMenu?.mode(cachedMode === undefined || cachedMode === 'dark')
+}
+initTheme()</script><template id="site-config">{"root":"/","runtime":"2023-04-20 00:00:00","lazyload":{"enable":false,"error":"/img/error_load.avif"},"copyright":false,"highlight":{"limit":200,"expand":true,"copy":true,"syntax":"highlight.js"},"friend_links":{"async":false,"path":"/links.json","total":0,"placeholder":"","default_avatar":"/img/default_avatar.avif","more_url":"/links/","loading":"Loading friend links...","error":"Unable to load friend links. Please try again.","retry":"Retry","random":"Visit a random friend link. Its safety and availability are not guaranteed. Selected: ⌈ ${name} ⌋","to":"Visit","more":"More","default_sort":"Default order","random_sort":"Random order","sort_label":"Change sort order","scroll_left":"Scroll left","scroll_right":"Scroll right"},"random_posts":["2026/11/26/c-language-final-review/","2026/11/18/初学后端/","2026/11/26/多样化的gcd/"],"randomlink":false,"feature_modules":{"search":false,"post_ai":false,"friend_links":false,"music":false,"right_menu":false,"translate":true,"covercolor":false},"lang":{"theme":{"dark":"Dark mode enabled","light":"Light mode enabled"},"copy":{"success":"Copied","error":"Copy failed"},"backtop":"Back to top","time":{"day":" days ago","hour":" hours ago","just":"now","min":" minutes ago","month":" months ago"},"day":" days","f12":"Developer mode is enabled. Please follow the GPL.","totalk":"Type your comment directly; blank lines are fine."},"aside":{"state":{"morning":"✨ 早上好，新的一天开始了","noon":"🍲 午餐时间","afternoon":"🌞 下午好","night":"早点休息","goodnight":"晚安 😴"},"witty_words":[],"witty_comment":{"prefix":"Long time no see, ","back":"Welcome back, "}},"covercolor":{"enable":false,"mode":"local","api":"https://api.qjqq.cn/api/Imgcolor?img=","time":43200000},"comment":false,"lightbox":null,"right_menu":false,"translate":{"translateDelay":0,"defaultEncoding":2,"toSimplified":"Simplified","toTraditional":"Traditional","switchedToSimplified":"Switched to Simplified Chinese","switchedToTraditional":"Switched to Traditional Chinese"},"lure":false,"expire":false}</template><template id="config-diff">{"is_post":true,"is_page":false,"is_home":false,"page":"post","toc":true,"comment":false,"ai_text":false,"color":false}</template><meta name="generator" content="Hexo 8.1.2"></head><body id="body"><div id="console"><div class="console-content"><div class="console-card-group" data-solitude-action="onConsoleCardGroupClick" data-solitude-event="true"><div class="console-card-group-right"><div class="console-card tags" data-solitude-action="hideConsole"><div class="card-content"><div class="author-content-item-tips">Tags</div><div class="author-content-item-title">Explore topics</div></div><div class="card-tag-cloud"><a href="/tags/C%E8%AF%AD%E8%A8%80/">C语言<sup>1</sup></a><a href="/tags/%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/">期末复习<sup>1</sup></a><a href="/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/">知识分享<sup>2</sup></a><a href="/tags/%E5%90%8E%E7%AB%AF/">后端<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/">算法<sup>1</sup></a><a href="/tags/gcd/">gcd<sup>1</sup></a><a href="/tags/%E6%95%B0%E8%AE%BA/">数论<sup>1</sup></a></div></div><div class="console-card history" data-solitude-action="hideConsole"><ul class="card-archive-list"><li class="item"><a href="/archives/2026/11/"><span class="date">2026/11</span><div class="count-group"><span class="count">3</span><span class="unit">Posts</span></div></a></li><li class="item"><a href="/archives/"><span class="date">All posts</span><div class="count-group"><span class="count">3</span><span class="unit">Posts</span></div></a></li></ul></div></div></div><div class="button-group"><div class="console-btn-item"><span class="darkmode_switchbutton" data-solitude-action="toggleTheme" title="Theme" heotip="Theme"><i class="solitude fas fa-circle-half-stroke"></i></span></div><div class="console-btn-item" id="consoleHideAside"><span class="asideSwitch" data-solitude-action="switchHideAside" title="Sidebar" heotip="Sidebar"><i class="solitude fas fa-arrows-left-right-to-line"></i></span></div></div></div><div class="console-mask" data-solitude-action="hideConsole"></div></div><div id="sidebar" style="zoom: 1;"><div id="menu-mask" style="display: none;"></div><div id="sidebar-menus"><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Archives</div><div class="length-num">3</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">2</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">7</div></a></div></div></div><span class="sidebar-menu-item-title">Function</span><div class="sidebar-menu-item"><span class="darkmode_switchbutton menu-child" data-solitude-action="toggleTheme"><i class="solitude fas fa-circle-half-stroke"></i><span>Display mode</span></span></div><span class="sidebar-menu-item-title">Tags</span><div class="card-tags"><div class="card-tag-cloud"><a href="/tags/C%E8%AF%AD%E8%A8%80/">C语言<sup>1</sup></a><a href="/tags/%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/">期末复习<sup>1</sup></a><a href="/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/">知识分享<sup>2</sup></a><a href="/tags/%E5%90%8E%E7%AB%AF/">后端<sup>1</sup></a><a href="/tags/%E7%AE%97%E6%B3%95/">算法<sup>1</sup></a><a href="/tags/gcd/">gcd<sup>1</sup></a><a href="/tags/%E6%95%B0%E8%AE%BA/">数论<sup>1</sup></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav class="show" id="nav" data-solitude-action="onNavBlankClickCloseConsole" data-solitude-event="true"><div id="nav-group"><div id="blog_name"><a href="/" title="Back to home" id="site-name" heotip="Back to home"><span class="title">早上好</span><i class="solitude fas fa-home"></i></a></div><div id="page-name-mask"><div id="page-name"><a id="page-name-text" data-solitude-action="toTop" title="Back to top" heotip="Back to top">gcd 出现的题型分类</a></div></div><div id="menus"></div><div id="nav-left"></div><div id="nav-right"><div class="nav-button" id="nav-totop" data-solitude-action="toTop" title="Back to top" heotip="Back to top"><a class="totopbtn"><i class="solitude fas fa-arrow-up"></i><span class="totop-fill"><span id="percent">1</span></span></a></div><div id="toggle-menu"><a class="site-page"><i class="solitude fas fa-bars"></i></a></div></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original" title="Licensed under Original.">Original</a><span class="post-meta-categories"><a class="post-meta-categories" href="/categories/%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0/">编程学习</a></span><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/"><span class="tags-name tags-punctuation"><i class="solitude fas fa-hashtag"></i>算法</span></a><a class="post-meta__tags" href="/tags/gcd/"><span class="tags-name tags-punctuation"><i class="solitude fas fa-hashtag"></i>gcd</span></a><a class="post-meta__tags" href="/tags/%E6%95%B0%E8%AE%BA/"><span class="tags-name tags-punctuation"><i class="solitude fas fa-hashtag"></i>数论</span></a></div></div></div></div><h1 class="post-title">gcd 出现的题型分类</h1><div id="post-meta"><div class="meta-secondline"></div></div></div><div class="post-radius-bottom"></div><article class="post-content article-container"><h1 id="一、gcd-出现在哪里"><a href="#一、gcd-出现在哪里" class="headerlink" title="一、gcd 出现在哪里"></a>一、gcd 出现在哪里</h1><p>gcd 的本质是 “两个数的最大公共度量” 。所以题目里一旦有“两个量之间来回折腾”的痕迹，就要往这想。</p>
+<h1 id="二、常见题型分类"><a href="#二、常见题型分类" class="headerlink" title="二、常见题型分类"></a>二、常见题型分类</h1><p>知道我为什么写这个吗？你知道那种你自己明明复习了这个类型，结果写题压根没认出来他的无力感吗。</p>
+<p>我知道写题要靠自己融会贯通，不能只是背题背模板。我先一步一步来吧</p>
+<h2 id="类型-1：纸面上直接写了倍数-约数"><a href="#类型-1：纸面上直接写了倍数-约数" class="headerlink" title="类型 1：纸面上直接写了倍数&#x2F;约数"></a>类型 1：纸面上直接写了倍数&#x2F;约数</h2><h3 id="特征"><a href="#特征" class="headerlink" title="特征"></a>特征</h3><p>最直白的一类，题干常出现：</p>
+<p>“最大公约数”“最小公倍数”“约数”“整除”“能被……整除”</p>
+<p>“把大块分成若干相等小块”“把两个尺寸切成一样长的小段”</p>
+<p>“切割”“铺砖”“划分区间”</p>
+<p>关键词：等分、切割、铺、分堆、整除。</p>
+<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：一块长 36 米、宽 24 米的菜地，要切成同样大小的正方形，且正方形尽量大、正好切完不留余料，边长是多少？</p>
+<p><strong>解析</strong>：正方形边长必须同时整除 36 和 24，又要尽可能大，所以取两者的最大公约数。gcd(36,24)&#x3D;12，边长为 12 米，共切成 (36&#x2F;12)×(24&#x2F;12)&#x3D;3×2&#x3D;6 块。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">gcd</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> </span>&#123; <span class="comment">//后面的题直接调用gcd函数，不再重复写</span></span><br><span class="line">    <span class="keyword">while</span> (y != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="type">int</span> t = x % y;</span><br><span class="line">        x = y;</span><br><span class="line">        y = t;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">36</span>, b = <span class="number">24</span>;</span><br><span class="line">    <span class="type">int</span> g = <span class="built_in">gcd</span>(a, b);                     <span class="comment">// 最大公约数</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, g);                     <span class="comment">// 输出 12</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, (a / g) * (b / g));     <span class="comment">// 输出 6</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<br />
+
+<h2 id="类型-2：周期性-同时发生-——-多半是-lcm，背后是-gcd"><a href="#类型-2：周期性-同时发生-——-多半是-lcm，背后是-gcd" class="headerlink" title="类型 2：周期性 &#x2F; 同时发生 —— 多半是 lcm，背后是 gcd"></a>类型 2：周期性 &#x2F; 同时发生 —— 多半是 lcm，背后是 gcd</h2><h3 id="特征-1"><a href="#特征-1" class="headerlink" title="特征"></a>特征</h3><p>“每隔 x 天”“每隔 y 秒”“多久同时发生一次”——这是 最小公倍数 。而 lcm 的求法依赖 gcd：</p>
+<p>lcm(a, b) &#x3D; a &#x2F; gcd(a, b) * b;</p>
+<p>关键词：同时、同步、再次相遇、重合、周期、每隔……</p>
+<h3 id="例子-1"><a href="#例子-1" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：甲每 4 天来图书馆一次，乙每 6 天来一次，今天两人同时来了，至少再过多少天再次同时来？</p>
+<p><strong>解析</strong>：再次同时 &#x3D; 找能被 4 和 6 同时整除的最小天数，即 lcm(4,6)。lcm 用 gcd 求：lcm(a,b)&#x3D;a&#x2F;gcd(a,b)*b&#x3D;4&#x2F;2*6&#x3D;12 天。特点：题目中出现两个周期、问“同时”的时刻，一定涉及 lcm&#x2F;gcd。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">4</span>, b = <span class="number">6</span>;</span><br><span class="line">    <span class="type">int</span> lcm = a / <span class="built_in">gcd</span>(a, b) * b;   <span class="comment">// 先除后乘，避免溢出</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, lcm);           <span class="comment">// 输出 12</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="类型-3：两个操作可以互相转换，问题问“能不能凑出来-到达某个状态”"><a href="#类型-3：两个操作可以互相转换，问题问“能不能凑出来-到达某个状态”" class="headerlink" title="类型 3：两个操作可以互相转换，问题问“能不能凑出来 &#x2F; 到达某个状态”"></a>类型 3：两个操作可以互相转换，问题问“能不能凑出来 &#x2F; 到达某个状态”</h2><h3 id="特征-2"><a href="#特征-2" class="headerlink" title="特征"></a>特征</h3><p>有两个“容器 &#x2F; 集合 &#x2F; 状态”，彼此之间可以 互相倒、互相转、互相扣</p>
+<p>每一步只能“装满 &#x2F; 倒空 &#x2F; 转移”</p>
+<p>问 能否达到某个目标 （能&#x2F;不能，或最少几步）</p>
+<p>关键词：倒水、装、倒、转移、混合、能否得到、是否可以达到。</p>
+<p>一句话识别术： “两个东西能互相倒来倒去、问能不能凑出第三个值” → 立刻想 gcd。</p>
+<h3 id="例子-2"><a href="#例子-2" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：</p>
+<p>zwd和llw太无聊了，于是两个人在工位上打赌。zwd 从柜子里翻出一个容量为 a 的桶和一个容量为 b 的桶，两个桶上都没有刻度，旁边有一根可以无限接水的水龙头。</p>
+<p>zwd 学姐扬言：只要有这两个桶，想要多少升水都能量出来。llw 觉得zwd在吹牛 —— 于是 zwd 随手报出一个数 c，让 llw 现场量给她看。</p>
+<p>他只能做下面三种操作：</p>
+<ol>
+<li>倒满：把某个桶装满水；</li>
+<li>倒空：把某个桶里的水全部倒掉；</li>
+<li>互相倒：把一个桶里的水倒进另一个桶，倒到「源桶空了」或者「目标桶满了」为止。</li>
+</ol>
+<p>如果 llw 能用这两个桶量出 c 升，就说明 zwd 说得对；量不出来，llw 就能反将一军。请判断：这次到底是谁赢了？</p>
+<br />
+
+<p>输入</p>
+<p>每个测试点都包含多组测试数据。第一行给定一个整数 T（1 ≤ T ≤ 10000），表示该测试点的测试数据组数。</p>
+<p>对于每组测试数据： 输入三个整数 a、b、c，分别作为两个桶的容量和需要量出的水量。</p>
+<p>输出</p>
+<p>对于每组测试数据，输出一行：如果能够量出 c 升水，输出YES，否则输出NO。</p>
+<br />
+
+<p><strong>解析</strong>：无论怎么折腾，两个桶的水量都是 g 的整数倍 （数学上叫 g 是该系统的最大不变量）。所以： 量出的水量 c 必须是 g &#x3D; gcd(a, b) 的倍数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">long</span> <span class="type">long</span> <span class="title">gcd</span><span class="params">(<span class="type">long</span> <span class="type">long</span> x, <span class="type">long</span> <span class="type">long</span> y)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (y) &#123;</span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> t = x % y;</span><br><span class="line">        x = y;</span><br><span class="line">        y = t;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> a, b, c;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%lld %lld %lld&quot;</span>, &amp;a, &amp;b, &amp;c);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (c == <span class="number">0</span>) &#123; </span><br><span class="line">       <span class="built_in">puts</span>(<span class="string">&quot;YES&quot;</span>); <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">   &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> mx = a &gt; b ? a : b;</span><br><span class="line">    <span class="keyword">if</span> (c &gt; mx) &#123; </span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;NO&quot;</span>); </span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">       &#125;</span><br><span class="line">    <span class="keyword">if</span> (c == a || c == b) &#123; </span><br><span class="line">          <span class="built_in">puts</span>(<span class="string">&quot;YES&quot;</span>); <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">        &#125;</span><br><span class="line">    <span class="built_in">puts</span>(c % <span class="built_in">gcd</span>(a, b) == <span class="number">0</span> ? <span class="string">&quot;YES&quot;</span> : <span class="string">&quot;NO&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="类型-4：几何-网格计数-——-要算“经过多少个点”"><a href="#类型-4：几何-网格计数-——-要算“经过多少个点”" class="headerlink" title="类型 4：几何 &#x2F; 网格计数 —— 要算“经过多少个点”"></a>类型 4：几何 &#x2F; 网格计数 —— 要算“经过多少个点”</h2><h3 id="特征-3"><a href="#特征-3" class="headerlink" title="特征"></a>特征</h3><p>比如从 (0,0) 到 (a,b) 的一条线段，穿过了多少个 整点 （坐标都是整数的点）？</p>
+<p>答案是  gcd(a,b) + 1 （含端点），或 gcd(a,b)（不含起点）。</p>
+<p>关键词：网格、格点、直线、线段、整点、有多少个整数点。</p>
+<p>特点 ：题目是几何描述，但“整点”意味着取整数， 分子分母能同时约掉的数量 就是 gcd。看到二维坐标里有“整数网格”问题，先想 gcd。</p>
+<h3 id="例子-3"><a href="#例子-3" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：从 (0,0) 到 (6,9) 的线段，一共经过多少个格点（横纵坐标都是整数的点，含两端）？</p>
+<p><strong>解析</strong>：线段上的格点数 &#x3D; gcd(a,b)+1。沿线段每走 1&#x2F;gcd 段就同时落在整数坐标上，共有 gcd 个等分，再加上起点。gcd(6,9)&#x3D;3，所以共 3+1&#x3D;4 个格点。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">6</span>, b = <span class="number">9</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, <span class="built_in">gcd</span>(a, b) + <span class="number">1</span>);   <span class="comment">// 输出 4</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="延伸：延网格走的最短路径问题"><a href="#延伸：延网格走的最短路径问题" class="headerlink" title="延伸：延网格走的最短路径问题"></a>延伸：延网格走的最短路径问题</h3><ul>
+<li>若是 无障碍、只能上下左右走 ，从 (0,0) 到 (n,m) 的最短步数很简单： 答案 &#x3D; n + m</li>
+</ul>
+<p>       因为横向至少走 n 步、纵向至少走 m 步，每条都躲不掉。</p>
+<ul>
+<li>如果允许斜着走一步（八方向） ，则：答案 &#x3D; max(n, m)</li>
+</ul>
+<br />
+
+<h2 id="类型-5：分数化简-比例化简"><a href="#类型-5：分数化简-比例化简" class="headerlink" title="类型 5：分数化简 &#x2F; 比例化简"></a>类型 5：分数化简 &#x2F; 比例化简</h2><h3 id="特征-4"><a href="#特征-4" class="headerlink" title="特征"></a>特征</h3><p>把 a&#x2F;b 化成最简分数，分子分母同时除以 gcd(a,b)。</p>
+<p>关键词：最简、约分、比例、化简、通分。</p>
+<p>特点 ：比较直白，是 gcd 最原始的用途。</p>
+<h3 id="例子-4"><a href="#例子-4" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：把分数 42&#x2F;56 化成最简分数。</p>
+<p><strong>解析</strong>：最简分数就是分子分母同时除以它们的 gcd。gcd(42,56)&#x3D;14，42&#x2F;14&#x3D;3，56&#x2F;14&#x3D;4，得到 3&#x2F;4。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">42</span>, b = <span class="number">56</span>;</span><br><span class="line">    <span class="type">int</span> g = <span class="built_in">gcd</span>(a, b);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d/%d\n&quot;</span>, a / g, b / g);   <span class="comment">// 输出 3/4</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="类型-6：环形-旋转-排列的“步长”"><a href="#类型-6：环形-旋转-排列的“步长”" class="headerlink" title="类型 6：环形 &#x2F; 旋转 &#x2F; 排列的“步长”"></a>类型 6：环形 &#x2F; 旋转 &#x2F; 排列的“步长”</h2><h3 id="特征-5"><a href="#特征-5" class="headerlink" title="特征"></a>特征</h3><p>比如 n 个位置的环，每次走 k 步，能走到哪些位置？会不会回到起点？</p>
+<p>这取决于 gcd(n, k)： 如果 gcd(n,k)&#x3D;1，能走遍所有位置；否则只能覆盖 gcd 个位置。</p>
+<p>关键词：环、转圈、步长、循环、能否走遍、最远到达。</p>
+<p>特点 ：“走 k 步”“数 k 个”“隔 k 个取”这类 离散步长 问题，本质上就是“最大公共度量”，用 gcd。</p>
+<h3 id="例子-5"><a href="#例子-5" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：一个由 16 个位置围成的圆环，从 0 号位出发，每次顺时针走 12 步，能到达多少个不同的位置？</p>
+<p><strong>解析</strong>：能走到的位置个数由 gcd(n,k) 决定。gcd(16,12)&#x3D;4，所以只能覆盖 4 个位置（依次为 0、12、8、4，之后回到起点）。如果 gcd(n,k)&#x3D;1，则能走遍所有位置。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n = <span class="number">16</span>, k = <span class="number">12</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, <span class="built_in">gcd</span>(n, k));   <span class="comment">// 输出 4</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="类型-7：染色-覆盖的边界问题"><a href="#类型-7：染色-覆盖的边界问题" class="headerlink" title="类型 7：染色 &#x2F; 覆盖的边界问题"></a>类型 7：染色 &#x2F; 覆盖的边界问题</h2><h3 id="特征-6"><a href="#特征-6" class="headerlink" title="特征"></a>特征</h3><p>1.题目里有个”周期”区间覆盖”的结构 ，让你问”能否全部染成某种状态”或”最少几种颜色”；</p>
+<p>&#x20;2. 元素之间有”距离”约束 ，这个距离往往和题给参数有关，而能否到达取决于 最大公约数 ；</p>
+<p>&#x20;3. 边界条件极其重要 ：0、负数、单点、n&#x2F;k 整除关系、是否含端点。</p>
+<p>关键词 : 染色、涂色、覆盖、标记</p>
+<h3 id="例子-6"><a href="#例子-6" class="headerlink" title="例子"></a>例子</h3><p><strong>题目</strong>：两点 i 和 j 能互相染色，当且仅当 |i - j| 是某个步长 d 的倍数。给定 n、d，问 整个区间在一条”步长为 d 的染色操作”下，能否全部染成同一种颜色？</p>
+<p><strong>解析</strong>：能”传递染色”当且仅当所有点落在 同一个”d 的模分类” 里，也就是：</p>
+<p>若整个 0 ~ n-1 都能被一步长 d 连起来，需要 gcd(d, 1) &#x3D; 1，其实要 d &#x3D; 1 才能覆盖连续的所有点；</p>
+<p>更常见形式： 问最少多少步 &#x2F; 是否所有点都能被某个 d 的倍数覆盖 。</p>
+<ul>
+<li>核心套路 ：把”染色”转为”在模 d 下能否连通”。若 d 与 n 的 gcd 为 g，则能连通的是 n&#x2F;g 个等价类， 必须 n&#x2F;g &#x3D; 1 才全部连通，即 d 与 n 互质且 d 较小 。</li>
+<li>边界条件</li>
+</ul>
+<p>区间长度 &#x3D; 1 ：不管 d 多少都是 YES；</p>
+<p>d &#x3D; 0 ：只能原地；</p>
+<p>d ≥ n ：只能覆盖自己，n &gt; 1 时 NO。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">gcd</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (y) &#123; <span class="type">int</span> t = x % y; x = y; y = t; &#125;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n, d;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d %d&quot;</span>, &amp;n, &amp;d);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;YES\n&quot;</span>);            <span class="comment">// 单点必然可染</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (d == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;NO\n&quot;</span>);             <span class="comment">// 不能移动</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        d = d &lt; <span class="number">0</span> ? -d : d;</span><br><span class="line">        <span class="type">int</span> g = <span class="built_in">gcd</span>(n, d);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, (n / g == <span class="number">1</span>) ? <span class="string">&quot;YES&quot;</span> : <span class="string">&quot;NO&quot;</span>);</span><br><span class="line">        <span class="comment">// n/g == 1 当且仅当 g == n，即 d 是 n 的倍数会 n/g=1？ </span></span><br><span class="line">        <span class="comment">// 注意：这里要小心 &quot;全部连通&quot; 的条件是 gcd(n,d)=1 还是 d|n，见下方讨论</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="三、总结有关gcd的题目样式"><a href="#三、总结有关gcd的题目样式" class="headerlink" title="三、总结有关gcd的题目样式"></a>三、总结有关gcd的题目样式</h1><table>
+<thead>
+<tr>
+<th>题目里出现……</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>“最大公约数 &#x2F; 整除 &#x2F; 约分 &#x2F; 最简”</td>
+<td>直白</td>
+</tr>
+<tr>
+<td>“同时 &#x2F; 每隔 &#x2F; 再次重合”</td>
+<td>周期性</td>
+</tr>
+<tr>
+<td>“两个东西互相倒 &#x2F; 转 &#x2F; 扣，能否凑出目标”</td>
+<td>中期机试题的类型</td>
+</tr>
+<tr>
+<td>“网格整点 &#x2F; 线段穿过多少点”</td>
+<td>几何计数</td>
+</tr>
+<tr>
+<td>“环上走 k 步能否走遍”</td>
+<td>步长</td>
+</tr>
+<tr>
+<td>“分成同样大小的块 &#x2F; 切割 &#x2F; 铺满”</td>
+<td>等分问题</td>
+</tr>
+</tbody></table>
+<br />
+</article><div class="post-copyright"><div class="post-copyright__author_group"><div class="post-copyright__author_img"><img class="post-copyright__author_img_front" src="/img/logo.png"></div><div class="post-copyright__author_name">ZYR</div><div class="post-copyright__author_desc"></div></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div id="quit-box" data-solitude-action="hideReward"></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">This original article uses the<a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>license. Please credit<a href="/">Hexo</a></span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/"><span class="tags-punctuation"><i class="solitude fas fa-hashtag"></i>算法<span class="tagsPageCount">1</span></span></a><a class="post-meta__tags" href="/tags/gcd/"><span class="tags-punctuation"><i class="solitude fas fa-hashtag"></i>gcd<span class="tagsPageCount">1</span></span></a><a class="post-meta__tags" href="/tags/%E6%95%B0%E8%AE%BA/"><span class="tags-punctuation"><i class="solitude fas fa-hashtag"></i>数论<span class="tagsPageCount">1</span></span></a></div></div></div><nav class="needEndHide pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/11/26/c-language-final-review/"><div class="pagination-info"><div class="label">Next</div><div class="next_info">C 语言易错知识点梳理</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><div class="top-group"><div class="sayhi" id="sayhi" data-solitude-action="changeWittyWord"></div></div></div><div class="avatar"><img alt="Avatar" src="/img/logo.png"></div><div class="description"></div><div class="bottom-group"><span class="left"><div class="name">ZYR</div><div class="desc">心之所向，素履所往，生如逆旅，一苇以航。</div></span><div class="social-icons is-center"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="solitude fas fa-bars"></i><span>Contents</span></div><div class="toc-content" id="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81gcd-%E5%87%BA%E7%8E%B0%E5%9C%A8%E5%93%AA%E9%87%8C"><span class="toc-text">一、gcd 出现在哪里</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B8%B8%E8%A7%81%E9%A2%98%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="toc-text">二、常见题型分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-1%EF%BC%9A%E7%BA%B8%E9%9D%A2%E4%B8%8A%E7%9B%B4%E6%8E%A5%E5%86%99%E4%BA%86%E5%80%8D%E6%95%B0-%E7%BA%A6%E6%95%B0"><span class="toc-text">类型 1：纸面上直接写了倍数&#x2F;约数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-text">例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-2%EF%BC%9A%E5%91%A8%E6%9C%9F%E6%80%A7-%E5%90%8C%E6%97%B6%E5%8F%91%E7%94%9F-%E2%80%94%E2%80%94-%E5%A4%9A%E5%8D%8A%E6%98%AF-lcm%EF%BC%8C%E8%83%8C%E5%90%8E%E6%98%AF-gcd"><span class="toc-text">类型 2：周期性 &#x2F; 同时发生 —— 多半是 lcm，背后是 gcd</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81-1"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90-1"><span class="toc-text">例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-3%EF%BC%9A%E4%B8%A4%E4%B8%AA%E6%93%8D%E4%BD%9C%E5%8F%AF%E4%BB%A5%E4%BA%92%E7%9B%B8%E8%BD%AC%E6%8D%A2%EF%BC%8C%E9%97%AE%E9%A2%98%E9%97%AE%E2%80%9C%E8%83%BD%E4%B8%8D%E8%83%BD%E5%87%91%E5%87%BA%E6%9D%A5-%E5%88%B0%E8%BE%BE%E6%9F%90%E4%B8%AA%E7%8A%B6%E6%80%81%E2%80%9D"><span class="toc-text">类型 3：两个操作可以互相转换，问题问“能不能凑出来 &#x2F; 到达某个状态”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81-2"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90-2"><span class="toc-text">例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-4%EF%BC%9A%E5%87%A0%E4%BD%95-%E7%BD%91%E6%A0%BC%E8%AE%A1%E6%95%B0-%E2%80%94%E2%80%94-%E8%A6%81%E7%AE%97%E2%80%9C%E7%BB%8F%E8%BF%87%E5%A4%9A%E5%B0%91%E4%B8%AA%E7%82%B9%E2%80%9D"><span class="toc-text">类型 4：几何 &#x2F; 网格计数 —— 要算“经过多少个点”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81-3"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90-3"><span class="toc-text">例子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%B6%E4%BC%B8%EF%BC%9A%E5%BB%B6%E7%BD%91%E6%A0%BC%E8%B5%B0%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84%E9%97%AE%E9%A2%98"><span class="toc-text">延伸：延网格走的最短路径问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-5%EF%BC%9A%E5%88%86%E6%95%B0%E5%8C%96%E7%AE%80-%E6%AF%94%E4%BE%8B%E5%8C%96%E7%AE%80"><span class="toc-text">类型 5：分数化简 &#x2F; 比例化简</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81-4"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90-4"><span class="toc-text">例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-6%EF%BC%9A%E7%8E%AF%E5%BD%A2-%E6%97%8B%E8%BD%AC-%E6%8E%92%E5%88%97%E7%9A%84%E2%80%9C%E6%AD%A5%E9%95%BF%E2%80%9D"><span class="toc-text">类型 6：环形 &#x2F; 旋转 &#x2F; 排列的“步长”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81-5"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90-5"><span class="toc-text">例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B-7%EF%BC%9A%E6%9F%93%E8%89%B2-%E8%A6%86%E7%9B%96%E7%9A%84%E8%BE%B9%E7%95%8C%E9%97%AE%E9%A2%98"><span class="toc-text">类型 7：染色 &#x2F; 覆盖的边界问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81-6"><span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90-6"><span class="toc-text">例子</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%80%BB%E7%BB%93%E6%9C%89%E5%85%B3gcd%E7%9A%84%E9%A2%98%E7%9B%AE%E6%A0%B7%E5%BC%8F"><span class="toc-text">三、总结有关gcd的题目样式</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="solitude fas fa-map"></i><span>Recent posts</span></div><div class="aside-list"><a class="aside-list-item" href="/2026/11/26/%E5%A4%9A%E6%A0%B7%E5%8C%96%E7%9A%84gcd/" title="gcd 出现的题型分类"><div class="content"><span class="title" href="/2026/11/26/%E5%A4%9A%E6%A0%B7%E5%8C%96%E7%9A%84gcd/" title="gcd 出现的题型分类">gcd 出现的题型分类</span><span class="categories" href="/2026/11/26/%E5%A4%9A%E6%A0%B7%E5%8C%96%E7%9A%84gcd/">编程学习</span></div></a><a class="aside-list-item" href="/2026/11/26/c-language-final-review/" title="C 语言易错知识点梳理"><div class="content"><span class="title" href="/2026/11/26/c-language-final-review/" title="C 语言易错知识点梳理">C 语言易错知识点梳理</span><span class="categories" href="/2026/11/26/c-language-final-review/">编程学习</span></div></a><a class="aside-list-item" href="/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/" title="初学后端"><div class="content"><span class="title" href="/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/" title="初学后端">初学后端</span><span class="categories" href="/2026/11/18/%E5%88%9D%E5%AD%A6%E5%90%8E%E7%AB%AF/">后端学习</span></div></a></div></div></div></div></main><footer id="footer"><div id="st-footer"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div class="copyright">© 2023 - 2026 By<a class="footer-bar-link" href="/" title="ZYR">ZYR</a></div><div class="beian-group"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://hexo.io/" title="Framework: Hexo" heotip="Framework: Hexo">Framework: Hexo</a><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/everfu/hexo-theme-solitude" title="Theme: Solitude" heotip="Theme: Solitude">Theme: Solitude</a></div></div><div class="footer-bar-right"></div></div></div><div class="comment-barrage needEndHide"></div></footer></div><div><!-- Critical scripts loaded synchronously--><script src="/js/utils.js?v=4.0.0"></script><!-- Non-critical scripts loaded asynchronously--><script defer src="/js/third_party/waterfall.min.js?v=4.0.0"></script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script><!-- Feature-specific scripts loaded asynchronously--><!-- UI enhancement scripts--><script defer src="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script><!-- Music player scripts--><!-- Cover color processing scripts--><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+Solitude.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+</script><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- Search functionality--><!-- Main module dynamically imports enabled first-party features.--><script type="module" src="/js/main.js?v=4.0.0"></script><script src="/js/click-effect.js"></script><script src="/js/touch-effect.js"></script><div class="js-pjax"></div></div><!-- pjax--><script>function initPjax() {
+    if (typeof Pjax === 'undefined') {
+        setTimeout(initPjax, 100);
+        return;
+    }
+
+    const instance = new Pjax({
+        elements: 'a:not([target="_blank"])',
+        selectors: ["title","#body-wrap","#site-config","meta[name=\"description\"]",".js-pjax","meta[property^=\"og:\"]","#config-diff",".rs_show",".rs_hide"],
+        cacheBust: false,
+        analytics: false,
+        scrollRestoration: false
+    })
+
+    // Pjax dispatches synthetic resize/scroll events on window after every selector switch.
+    // Use a Node target so injected listeners that call event.target.contains() remain compatible.
+    instance.onSwitch = function () {
+        this.state.numPendingSwitches--
+
+        if (this.state.numPendingSwitches === 0) {
+            document.dispatchEvent(new Event('resize', { bubbles: true }))
+            document.dispatchEvent(new Event('scroll', { bubbles: true }))
+            this.afterAllSwitches()
+        }
+    }
+
+    Solitude.pjax = instance;
+
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+        const newScript = document.createElement('script')
+        const content = item.text || item.textContent || item.innerHTML || ""
+        Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+        newScript.appendChild(document.createTextNode(content))
+        item.parentNode.replaceChild(newScript, item)
+    })
+
+    document.addEventListener('pjax:send', () => {
+        document.dispatchEvent(new CustomEvent('solitude:beforeNavigate'))
+        Solitude.disposePage?.()
+        Object.values(window.globalFn?.pjax || {}).forEach(dispose => dispose())
+        if (window.globalFn) window.globalFn.pjax = {}
+    })
+
+    document.addEventListener('pjax:complete', async () => {
+        await Solitude.refresh()
+
+        document.querySelectorAll('script[data-pjax]').forEach(item => {
+            const newScript = document.createElement('script')
+            const content = item.text || item.textContent || item.innerHTML || ""
+            Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+            newScript.appendChild(document.createTextNode(content))
+            item.parentNode.replaceChild(newScript, item)
+        })
+
+        Solitude.config.lazyload.enable && window.lazyLoadInstance?.update()
+        document.dispatchEvent(new CustomEvent('solitude:afterNavigate', {
+            detail: {page: Solitude.page}
+        }))
+
+    })
+
+    document.addEventListener('pjax:error', (e) => {
+        if (e.request.status === 404) {
+            Solitude.navigate('/404.html')
+        }
+    })
+}
+
+// 初始化 Pjax
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPjax);
+} else {
+    initPjax();
+}</script><!-- google adsense--></body></html>
